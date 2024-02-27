@@ -1,39 +1,67 @@
 from flask import Flask, request, jsonify
-import csv
 import re
+import requests
+import os
 
 
 app = Flask(__name__)
 
-@app.route("/slack/events", methods=["POST"])
+# Airtable setup
+AIRTABLE_BASE_ID = 'applUHGDLKLaRM65V'
+AIRTABLE_TABLE_NAME = 'Projects'
+
+# Assuming 'AIRTABLE_PERSONAL_ACCESS_TOKEN', 'AIRTABLE_BASE_ID', 'AIRTABLE_TABLE_NAME'
+# are set as App Service settings
+AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv('AIRTABLE_PERSONAL_ACCESS_TOKEN')
+# AIRTABLE_BASE_ID = os.getenv('AIRTABLE_BASE_ID')
+# AIRTABLE_TABLE_NAME = os.getenv('AIRTABLE_TABLE_NAME')
+AIRTABLE_ENDPOINT = f'https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}'
+
+headers = {
+    'Authorization': f'Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}',
+    'Content-Type': 'application/json',
+}
+
+def post_to_airtable(data):
+    """Post the extracted data to Airtable"""
+    response = requests.post(AIRTABLE_ENDPOINT, json=data, headers=headers)
+    print(response.json())
+
+@app.route('/slack/events', methods=['POST'])
 def slack_events():
     data = request.json
-     # Check if this is a challenge request
     if data.get('type') == 'url_verification':
-        # Respond to the challenge
-        return jsonify({
-            "challenge": data.get('challenge')
-        })
+        return jsonify({"challenge": data.get('challenge")})
+    
+    if data.get('type') == 'event_callback' and data['event'].get('type') == 'message':
+        message = data['event'].get('text')
+        user = data['event'].get('user')  # Consider resolving this to a username if needed
+        
+        # Extract information
+        links = ', '.join(re.findall(r'http[s]?://\S+', message))
+        hashtags = ', '.join(re.findall(r'#\w+', message))
+        text = re.sub(r'(http[s]?://\S+|#\w+)', '', message).strip()
+        
+        # Prepare data for Airtable
+        data_to_post = {
+            "fields": {
+                "Link": links,
+                "Sender": user,  # Consider using usernames
+                "Hashtags": hashtags,
+                "Text": text
+            }
+        }
+        
+        # Post to Airtable
+        post_to_airtable(data_to_post)
+        
+        return 'OK', 200
+    
+    return 'OK', 200
 
-    # Check if this is a message from a user
-    if data["type"] == "event_callback" and data["event"]["type"] == "message":
-        process_message(data["event"])
-    return jsonify({"status": "ok"})
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
 
-def process_message(event):
-    # Extract information from the event
-    link = re.search("(http[s]?://[^\s]+)", event["text"]).group(0)
-    sender = event["user"]
-    hashtags = " ".join(re.findall("(#[^\s]+)", event["text"]))
-    remaining_text = re.sub("(http[s]?://[^\s]+)|(#\S+)", "", event["text"]).strip()
-
-    # Save to CSV
-    with open("messages.csv", "a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([link, sender, hashtags, remaining_text])
-
-if __name__ == "__main__":
-    app.run(port=3000, debug=True)
 
 # import os
 
