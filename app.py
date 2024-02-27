@@ -30,8 +30,6 @@ def post_to_airtable(data):
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
     data = request.json
-    if data.get('type') == 'url_verification':
-        return jsonify({"challenge": data.get('challenge")})
     
     if data.get('type') == 'event_callback' and data['event'].get('type') == 'message':
         message = data['event'].get('text')
