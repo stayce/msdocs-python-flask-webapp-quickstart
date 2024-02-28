@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import datetime
 from flask import (Flask, redirect, render_template, request, jsonify, send_from_directory, url_for)
 
 app = Flask(__name__)
@@ -26,6 +27,15 @@ def post_to_airtable(data):
     response = requests.post(AIRTABLE_ENDPOINT, json=data, headers=headers)
     print(response.json())
 
+# Function to get username from user ID using Slack API
+def get_username(user_id):
+    response = requests.get(f'https://slack.com/api/users.info?user={user_id}', headers=headers)
+    user_info = response.json()
+    if response.status_code == 200 and user_info['ok']:
+        return user_info['user']['name']
+    else:
+        return None
+
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
     data = request.json
@@ -34,16 +44,8 @@ def slack_events():
         message = data['event'].get('text')
         user_id = data['event'].get('user')
         username = get_username(user_id)
-        date = data['event'].get('ts')
-
-        # Function to get username from user ID using Slack API
-        def get_username(user_id):
-            response = requests.get(f'https://slack.com/api/users.info?user={user_id}', headers=headers)
-            user_info = response.json()
-            if response.status_code == 200 and user_info['ok']:
-                return user_info['user']['name']
-            else:
-                return None
+        timestamp = data['event'].get('ts')
+        date = datetime.datetime.fromtimestamp(float(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
         
         # Extract information
         links = ', '.join(re.findall(r'http[s]?://\S+', message))
@@ -57,7 +59,7 @@ def slack_events():
                 "Sender": username,
                 "Hashtags": hashtags,
                 "Text": text,
-                "Date": date.to_datetime_string()
+                "Date": date
             }
         }
         
