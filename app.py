@@ -17,7 +17,7 @@ AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv('AIRTABLE_PERSONAL_ACCESS_TOKEN')
 AIRTABLE_ENDPOINT = f'https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}'
 
 headers = {
-    'Authorization': f'Bearer {AIRTABLE_PERSONAL_ACCESS_TOKEN}',
+    'Authorization': f'Bearer {"patj0zu2UFayFZSF1.dfeb1e15ed875fbd349355d7512ec24f875e4c2f7523ac79f9a0f249cd2da321"}',
     'Content-Type': 'application/json',
 }
 
@@ -32,7 +32,17 @@ def slack_events():
     
     if data.get('type') == 'event_callback' and data['event'].get('type') == 'message':
         message = data['event'].get('text')
-        user = data['event'].get('user')  # Consider resolving this to a username if needed
+        user_id = data['event'].get('user')
+        username = get_username(user_id)
+
+        # Function to get username from user ID using Slack API
+        def get_username(user_id):
+            response = requests.get(f'https://slack.com/api/users.info?user={user_id}', headers=headers)
+            user_info = response.json()
+            if response.status_code == 200 and user_info['ok']:
+                return user_info['user']['name']
+            else:
+                return None
         
         # Extract information
         links = ', '.join(re.findall(r'http[s]?://\S+', message))
@@ -43,7 +53,7 @@ def slack_events():
         data_to_post = {
             "fields": {
                 "Link": links,
-                "Sender": user,  # Consider using usernames
+                "Sender": username,
                 "Hashtags": hashtags,
                 "Text": text
             }
