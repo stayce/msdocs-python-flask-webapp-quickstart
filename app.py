@@ -34,6 +34,7 @@ def slack_events():
         message = data['event'].get('text')
         user_id = data['event'].get('user')
         username = get_username(user_id)
+        date = data['event'].get('ts')
 
         # Function to get username from user ID using Slack API
         def get_username(user_id):
@@ -55,7 +56,8 @@ def slack_events():
                 "Link": links,
                 "Sender": username,
                 "Hashtags": hashtags,
-                "Text": text
+                "Text": text,
+                "Date": date.to_datetime_string()
             }
         }
         
