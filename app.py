@@ -46,6 +46,15 @@ def slack_events():
         username = get_username(user_id)
         timestamp = data['event'].get('ts')
         date = datetime.datetime.fromtimestamp(float(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+        channel_id = data['event'].get('channel')
+
+        # Retrieve channel information using Slack API
+        response = requests.get(f'https://slack.com/api/conversations.info?channel={channel_id}', headers=headers)
+        channel_info = response.json()
+        if response.status_code == 200 and channel_info['ok']:
+            channel_name = channel_info['channel']['name']
+        else:
+            channel_name = "None"
         
         # Extract information
         links = ', '.join(re.findall(r'http[s]?://\S+', message))
@@ -59,7 +68,8 @@ def slack_events():
                 "Sender": username,
                 "Hashtags": hashtags,
                 "Text": text,
-                "Date": date
+                "Date": date,
+                "Channel": channel_name
             }
         }
         
