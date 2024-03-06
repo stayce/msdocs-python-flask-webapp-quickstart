@@ -1,22 +1,245 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Hello Azure - Python Quickstart</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoimmune Wellness & Weather</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+
+  </style>
+
+<!-- <style>
+  .marker-container {
+      position: relative;
+      height: 0;
+  }
+  .marker-value-container {
+      position: absolute;
+      top: 0;
+      left: 50%; /* This will be set dynamically by JavaScript */
+      transform: translateX(-50%);
+  }
+  .value-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: bold;
+  }
+  .caret-down {
+      position: absolute;
+      top: 40px; /* Adjust the top value to match the circle height */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid orange;
+  }
+</style> -->
+
+  
 </head>
-<html>
-   <body>
-     <main>
-        <div class="px-4 py-3 my-2 text-center">
-            <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/azure-icon.svg') }}" alt="Azure Logo" width="192" height="192"/>
-            <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
-            <h1 class="display-6 fw-bold text-primary">Welcome to Azure</h1>            
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header>
+            <h1 class="text-3xl font-bold text-gray-800 text-center mb-6">Your Weather Companion for Autoimmune Wellness</h1>
+        </header>
+        <input type="text" id="locationInput" placeholder="Enter ZIP or Postal Code">
+        <button onclick="fetchWeatherData()">Get Weather</button>
+        <div id="weather"></div>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Today's Weather Forecast 
+              <span id="city_name">for Your Area</span>
+            </h2>
+            <p class="text-gray-600 mt-2">Check out today's weather forecast and plan your activities knowing what to expect. Whether it's Lupus, Rheumatoid Arthritis (RA), Inflammatory Bowel Disease (IBD), or another autoimmune condition, understanding the day's weather can help you manage your symptoms more effectively.</p>
+        </section>
+        <section class="mb-8">
+            <p>UV Index: <span id="uvIndex">1</span><strong class="mx-2">Health Concern:</strong><span id="uvHealthConcern"> Low</span></p>
+            <!-- gradient background: linear-gradient(to right, #32CD32, #FFD700, #FF4500); -->
+            <div class="gradient-bar rounded-lg my-4 relative w-3/4 mx-auto h-8 mt-8 bg-gradient-to-r from-green-400 to-yellow-400 to-red-400">
+              <div class="uv-marker absolute" id="uvMarker" style="left: calc(10% - 1px);">
+                  <span class="bg-black text-white rounded-full h-8 w-8 flex items-center justify-center absolute -top-6" id="uvNumber">1</span>
+                  <div class="caret-down"></div>
+              </div>
           </div>
-        <form method="post" action="{{url_for('hello')}}">
+        </section>
+
+        <section class="mb-8">
+          <p>Temperature: <span class="temperatureNumber">20</span>°C</p>
+          <!-- gradient from blue to green to red -->
+          <div class="gradient-bar rounded-lg my-4 relative w-3/4 mx-auto h-8 mt-8 bg-gradient-to-r from-blue-500 from-10% via-green-500 via-30% to-red-500 to-90%">
+              <div class="temperature-marker absolute" id="temperatureMarker" style="left: calc(50% - 1px);">
+                  <span class="bg-black text-white rounded-full h-8 w-8 flex items-center justify-center absolute -top-6 temperatureNumber"></span>
+                  <div class="caret-down"></div>
+              </div>
+          </div>
+        </section>
+
+        <!-- <div class="relative pt-1">
+          <div class="flex mb-2 items-center justify-between">
+              <div>
+                  <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">
+                      Desirable
+                  </span>
+              </div>
+              <div class="text-right">
+                  <span class="text-xs font-semibold inline-block text-green-600">
+                      High
+                  </span>
+              </div>
+          </div>
+          <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-green-200">
+              <div style="width:30%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"></div>
+              <div style="width:20%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"></div>
+              <div style="width:50%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+          </div>
+          <div class="marker-container relative" style="margin-top: -1.25rem; margin-bottom: 1.5rem;">
+              <div class="absolute marker-value-container" style="left:calc(14% - 20px);">
+                  <div class="value-circle bg-orange-500 text-white rounded-full h-8 w-8 flex items-center justify-center" style="font-size:0.75rem;">
+                      141
+                  </div>
+                  <div class="caret-down"></div>
+              </div>
+          </div>
+      </div> -->
+      
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Upcoming Weather Trends</h2>
+            <p class="text-gray-600 mt-2">Stay ahead with our upcoming weather trends. Knowing what's coming can help you prepare for days that might be more challenging and take advantage of better days.</p>
+            <!-- Insert Upcoming Weather Forecast -->
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Understanding the Connection: Weather and Autoimmune Conditions</h2>
+            <div class="mt-4">
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700">Lupus and UV Light</h3>
+                    <p class="text-gray-600">Sun exposure can trigger flare-ups in Lupus patients due to UV light's effect on the skin. Planning your outdoor activities with UV levels in mind can help manage this risk.</p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700">Rheumatoid Arthritis (RA) and Humidity</h3>
+                    <p class="text-gray-600">Changes in humidity and barometric pressure have been associated with increased joint pain and stiffness in RA patients. Monitoring these changes can be key to managing discomfort.</p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="font-semibold text-gray-700">Inflammatory Bowel Disease (IBD) and Seasonal Changes</h3>
+                    <p class="text-gray-600">Some IBD patients report seasonal flare-ups, with symptoms worsening during certain times of the year. Understanding your pattern can help in anticipating and mitigating flare-ups.</p>
+                </div>
+            </div>
+        </section>
+<!-- 
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold text-gray-700">Understanding the Connection: Weather and Autoimmune Conditions</h2>
+          <div class="mt-4">
+              <div class="mb-4">
+                  <h3 class="font-semibold text-gray-700">Impact of Warm Temperatures on Autoimmune Conditions</h3>
+                  <p class="text-gray-600">Warm temperatures and high humidity levels can exacerbate symptoms for individuals with autoimmune diseases. For conditions like lupus, exposure to higher temperatures can lead to flare-ups, characterized by increased fatigue, joint pain, and rashes. Managing activities and hydration during warmer periods is crucial to mitigating these effects. Similarly, individuals with conditions such as psoriatic arthritis may experience intensified symptoms in warm weather, making it essential to adopt preventive strategies.</p>
+              </div>
+              <div class="mb-4">
+                  <h3 class="font-semibold text-gray-700">Effects of Cold Weather on Autoimmune Diseases</h3>
+                  <p class="text-gray-600">Cold weather can significantly impact autoimmune conditions, triggering flare-ups in diseases such as lupus, rheumatoid arthritis, and psoriasis. The constriction of blood vessels in cold temperatures can exacerbate pain, particularly in extremities, and lead to increased discomfort. Strategies to maintain warmth, minimize exposure to cold, and manage indoor humidity levels are vital during colder months to help reduce the risk of flare-ups.</p>
+              </div>
+              <div class="mb-4">
+                  <h3 class="font-semibold text-gray-700">Lupus and UV Light</h3>
+                  <p class="text-gray-600">Sun exposure can trigger flare-ups in Lupus patients due to UV light's effect on the skin. Planning your outdoor activities with UV levels in mind can help manage this risk.</p>
+              </div>
+              <div class="mb-4">
+                  <h3 class="font-semibold text-gray-700">Rheumatoid Arthritis (RA) and Humidity</h3>
+                  <p class="text-gray-600">Changes in humidity and barometric pressure have been associated with increased joint pain and stiffness in RA patients. Monitoring these changes can be key to managing discomfort.</p>
+              </div>
+              <div class="mb-4">
+                  <h3 class="font-semibold text-gray-700">Inflammatory Bowel Disease (IBD) and Seasonal Changes</h3>
+                  <p class="text-gray-600">Some IBD patients report seasonal flare-ups, with symptoms worsening during certain times of the year. Understanding your pattern can help in anticipating and mitigating flare-ups.</p>
+              </div>
+          </div>
+      </section> -->
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-700">Understanding the Connection between Weather and Autoimmune Conditions</h2>
+        <div class="mt-4">
+            <div class="mb-4">
+                <h3 class="font-semibold text-gray-700">Warm Temperatures and UV Exposure</h3>
+                <p class="text-gray-600">Warm weather can worsen symptoms for people with autoimmune diseases. For **lupus** patients, increased temperatures may lead to fatigue, joint pain, and rashes due to UV light sensitivity. **Psoriatic arthritis** sufferers might find joint pain intensifies, emphasizing the need for careful management of sun exposure and activities. Additionally, **Multiple Sclerosis (MS)** patients may experience heat sensitivity, leading to symptom flare-ups. Ensuring adequate hydration, wearing protective clothing, and seeking shade can mitigate these effects.</p>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold text-gray-700">Cold Weather</h3>
+                <p class="text-gray-600">Cold temperatures can trigger flare-ups in various autoimmune conditions. **Rheumatoid arthritis** and **psoriatic arthritis** patients often report increased joint pain and stiffness due to the cold, necessitating warm, protective clothing and indoor warmth. **Lupus** individuals may experience exacerbated symptoms as cold weather can impair circulation, especially in extremities, highlighting the importance of temperature regulation and avoidance of sudden temperature changes. **Sjögren's syndrome** sufferers might notice an increase in dryness symptoms, requiring more intensive moisture management strategies.</p>
+            </div>
+            <div class="mb-4">
+                <h3 class="font-semibold text-gray-700">Humidity and Barometric Pressure</h3>
+                <p class="text-gray-600">High humidity levels and changes in barometric pressure can challenge individuals with **Rheumatoid arthritis (RA)**, leading to discomfort and increased joint pain. For **IBD** patients, humidity can exacerbate gastrointestinal symptoms, making dietary adjustments and hydration particularly important. People with **asthma and autoimmune-related lung conditions** may find that humid conditions worsen respiratory symptoms, underscoring the need for air quality management and conditioning spaces to comfortable humidity levels.</p>
+            </div>
+            <div class="mb-4">
+              <h3 class="font-semibold text-gray-700">Inflammatory Bowel Disease (IBD) and Seasonal Changes</h3>
+              <p class="text-gray-600">Some IBD patients report seasonal flare-ups, with symptoms worsening during certain times of the year. Understanding your pattern can help in anticipating and mitigating flare-ups.</p>
+          </div>
+        </div>
+    </section>
+    <!-- Seasonality and Autoimmune Diseases: Research by Watad et al. (2017) discusses the role of seasonal factors in autoimmune diseases. It highlights how environmental elements like infections, low vitamin D levels, UV radiation, and melatonin, which exhibit seasonal variations, could influence the onset, relapses, and activity of various autoimmune diseases. The study found that vitamin D levels, which are lowest during late winter and early spring, correlate with increased disease activity and severity in diseases such as multiple sclerosis (MS), systemic lupus erythematosus (SLE), psoriasis, and rheumatoid arthritis (RA). This study underscores the importance of considering seasonal variation in the pathogenesis and treatment of autoimmune diseases. Read more on PubMed https://pubmed.ncbi.nlm.nih.gov/28624334/
+
+Human Autoimmune Diseases Update: Wang et al. (2015) offer a comprehensive update on the advances in understanding human autoimmunity, emphasizing the significant role of environmental factors, including seasonal changes, in triggering autoimmune diseases. This review points to the importance of genetic predisposition and environmental triggers in the development of autoimmune conditions. It also highlights the advancements in therapies targeting inflammatory responses within autoimmune diseases, particularly noting the success in treating rheumatoid arthritis. Read more on PubMed https://pubmed.ncbi.nlm.nih.gov/26212387/ -->
+      
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Tips for Managing Autoimmune Conditions in Changing Weather</h2>
+            <ul class="list-disc list-inside text-gray-600 mt-2">
+                <li>Stay Informed: Keep an eye on daily and weekly weather forecasts on our site to plan your activities.</li>
+                <li>Plan Ahead: If cold and damp weather worsens your symptoms, plan indoor activities for those days.</li>
+                <li>Protect Yourself: For conditions like Lupus, wearing protective clothing and sunscreen is crucial on sunny days.</li>
+                <li>Stay Hydrated: Regardless of the weather, staying hydrated is key to managing autoimmune symptoms.</li>
+                <li>Listen to Your Body: Everyone's experience with autoimmune conditions is unique. Pay attention to how your body responds to different weather conditions and adjust your activities accordingly.</li>
+            </ul>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Join Our Community</h2>
+            <p class="text-gray-600 mt-2">Connect with others who understand what you're going through. Share tips, support, and insights with fellow patients navigating the complexities of autoimmune conditions.</p>
+            <!-- Link to Community or Forum -->
+        </section>
+
+        <!-- section on peer reviewed research -->
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700">Peer-Reviewed Research on Weather and Autoimmune Conditions</h2>
+            <p class="text-gray-600 mt-2">Stay informed with the latest research on the connection between weather and autoimmune conditions. Our curated list of peer-reviewed articles can help you understand the science behind the impact of weather on your health.</p>
+            <div class="max-w-4xl mx-auto">
+              <ul class="list-disc space-y-2 pl-5 text-gray-700">
+                  <li>
+                      Watad, A., et al. (2017). "Seasonality and autoimmune diseases: The contribution of the four seasons to the mosaic of autoimmunity." <i>Journal of Autoimmunity</i>, 82, 13-30. 
+                      <a href="https://pubmed.ncbi.nlm.nih.gov/28624334/" class="text-blue-500 hover:text-blue-700" target="_blank">PubMed</a>
+                  </li>
+                  <li>
+                      Savage, E.M., et al. (2015). "Does rheumatoid arthritis disease activity correlate with weather conditions?" <i>Rheumatology International</i>, 35(5), 887-890. 
+                      <a href="https://pubmed.ncbi.nlm.nih.gov/25342437/" class="text-blue-500 hover:text-blue-700" target="_blank">PubMed</a>
+                  </li>
+                  <li>
+                      Stojan, G., et al. (2019). "Environmental and atmospheric factors in systemic lupus erythematosus: A regression analysis." <i>Arthritis & Rheumatol</i>, 71(suppl 10).
+                      <a href="https://acrabstracts.org/abstract/environmental-and-atmospheric-factors-in-systemic-lupus-erythematosus-a-regression-analysis/" class="text-blue-500 hover:text-blue-700" target="_blank">ACR Abstracts</a>
+                  </li>
+              </ul>
+          </div>
+        </section>
+
+        <footer class="text-center py-4"text-gray-600">Stay connected and informed with the latest in autoimmune wellness. Sign up for our newsletter to receive updates directly to your inbox.</p>
+            <!-- Newsletter Sign-Up Form -->
+        </footer>
+    </div>
+
+
+        <div class="px-4 py-3 my-2 text-center">
+            <!-- <img class="d-block mx-auto mb-4" src="{{ url_for('static', filename='images/azure-icon.svg') }}" alt="Azure Logo" width="192" height="192"/> -->
+            <!-- <img  src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57"> -->
+        </div>
+        <!-- <form method="post" action="{{url_for('hello')}}">
             <div class="col-md-6 mx-auto text-center">
                 <label for="name" class="form-label fw-bold fs-5">Could you please tell me your name?</label>
-
-                <!-- <p class="lead mb-2">Could you please tell me your name?</p> -->
+                <p class="lead mb-2">Could you please tell me your name?</p> 
                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-center align-items-center my-1">
                     <input type="text" class="form-control" id="name" name="name" style="max-width: 256px;">
                   </div>            
@@ -24,7 +247,160 @@
                   <button type="submit" class="btn btn-primary btn-lg px-4 gap-3">Say Hello</button>
                 </div>            
             </div>
-        </form>
-     </main>      
+        </form> -->
+        <script>
+
+function fetchWeatherData() {
+    const locationInput = document.getElementById('locationInput').value.trim();
+    if (!locationInput) {
+        alert("Please enter a US ZIP or UK Postal Code.");
+        return;
+    }
+
+    // const apiKey = '3BnOQVAgGVEL0SA4oM8RiNDu2Rw81pcP';
+    const apiKey = 'OBhDk3rro51GKTj7nKnYWZIqPqEno0iR';
+    const currentWeatherUrl = `https://api.tomorrow.io/v4/weather/realtime?location=${encodeURIComponent(locationInput)}&apikey=${apiKey}`;
+    const forecastUrl = `https://api.tomorrow.io/v4/timelines?location=${encodeURIComponent(locationInput)}&fields=temperature,precipitationIntensity,weatherCode,pressureSurfaceLevel,particulateMatter25,mepPrimaryPollutant&apikey=${apiKey}`;
+
+    const fetchOptions = { method: 'GET', headers: { accept: 'application/json' } };
+
+    Promise.all([
+        fetch(currentWeatherUrl, fetchOptions).then(res => res.json()),
+        fetch(forecastUrl, fetchOptions).then(res => res.json())
+    ])
+    .then(([currentWeatherResponse, forecastResponse]) => {
+        const weatherData = processWeatherData(currentWeatherResponse, forecastResponse);
+        displayWeatherData(weatherData);
+        // Store the location and weather data in local storage
+        localStorage.setItem('location', locationInput);
+        localStorage.setItem('weatherData', JSON.stringify(weatherData));
+
+        console.log('Weather data:', weatherData);
+    })
+    .catch(error => {
+        console.error('Error fetching weather data:', error);
+        alert('Failed to fetch weather data. Please try again.');
+    });
+}
+
+function processWeatherData(currentWeatherResponse, forecastResponse) {
+    // Example processing - adjust according to actual API response structure
+    const weatherData = {
+        temp: currentWeatherResponse.data.values.temperature,
+        uvIndex: currentWeatherResponse.data.values.uvIndex,
+        forecast: forecastResponse.data.timelines[0].intervals[0].values,
+        cityName: currentWeatherResponse.location.name,
+        currentWeatherResponse: currentWeatherResponse,
+        forecastResponse: forecastResponse
+    };
+    return weatherData;
+}
+
+function loadWeatherData() {
+    const weatherData = localStorage.getItem('weatherData');
+    const location = localStorage.getItem('location');
+
+    if (weatherData && location) {
+        displayWeatherData(JSON.parse(weatherData));
+        document.getElementById('locationInput').value = location;
+        console.log('Loaded weather data from local storage for location:', location);
+        console.log('Weather data:', weatherData);
+    } else {
+        console.log('No weather data found in local storage.');
+    }
+}
+
+
+function displayWeatherData(weatherData) {
+    // Simplify the display logic based on the processed data
+    updateCityName(weatherData.cityName);
+    const weatherDiv = document.getElementById('weather');
+
+    let uvHealthConcern = getUvHealthConcernLevel(weatherData.uvIndex);
+    let primaryPollutant = getPrimaryPollutant(weatherData.forecast.mepPrimaryPollutant);
+
+    setUVIndexMarker(weatherData.uvIndex);
+    setTemperatureMarker(weatherData.temp);
+    
+    weatherDiv.innerHTML = `<p>Temperature: ${weatherData.temp}°C</p>
+                            <p>UV Index: ${weatherData.uvIndex}, Health Concern: ${uvHealthConcern}</p>
+                            <p>Forecast details...</p>
+                            <p>Primary Pollutant: ${primaryPollutant}</p>`;
+}
+
+function getUvHealthConcernLevel(uvIndex) {
+    if (uvIndex <= 2) return 'Low';
+    if (uvIndex <= 5) return 'Moderate';
+    if (uvIndex <= 7) return 'High';
+    if (uvIndex <= 10) return 'Very High';
+    return 'Extreme';
+}
+
+function setUVIndexMarker(uvIndex, maxValue = 11) {
+    const uvMarker = document.getElementById('uvMarker');
+    const uvNumber = document.getElementById('uvNumber');
+    const uvIndexSpan = document.getElementById('uvIndex');
+    const uvHealthConcern = document.getElementById('uvHealthConcern');
+    uvMarker.style.left = `calc(${(uvIndex / maxValue) * 100}% - 1px)`;
+    uvNumber.textContent = uvIndex; // Update the UV index number
+    uvIndexSpan.textContent = uvIndex;
+    uvHealthConcern.textContent = getUvHealthConcernLevel(uvIndex);
+}
+
+// Temperature indicator from blue to green to red with green in the comfortable range
+function setTemperatureMarker(temperature) {
+    const temperatureMarker = document.getElementById('temperatureMarker');
+    // Select all elements with the class temperatureNumber
+    const temperatureNumbers = document.querySelectorAll('.temperatureNumber');
+    console.log('Temperature:', temperature);
+    console.log('Percentage:', (temperature / 40) * 100);
+    temperatureMarker.style.left = `calc(${(temperature / 40) * 100}% - 1px)`;
+    
+    // Update all temperatureNumber elements
+    temperatureNumbers.forEach(temperatureNumber => {
+        temperatureNumber.textContent = temperature.toFixed(1);
+    });
+
+    // Update gradient based on temperature
+    // if (temperature < 10) {
+    //     gradientBar.style.background = 'linear-gradient(to right, blue, blue)';
+    // } else if (temperature >= 10 && temperature < 20) {
+    //     gradientBar.style.background = 'linear-gradient(to right, blue, green)';
+    // } else if (temperature >= 20 && temperature < 30) {
+    //     gradientBar.style.background = 'linear-gradient(to right, green, green)';
+    // } else if (temperature >= 30 && temperature < 40) {
+    //     gradientBar.style.background = 'linear-gradient(to right, green, red)';
+    // } else { // temperature >= 40
+    //     gradientBar.style.background = 'linear-gradient(to right, red, red)';
+    // }
+}
+
+// function setUVIndexPosition(uvIndex, maxValue) {
+//     const percentageValue = (uvIndex / maxValue) * 100;
+//     const markerContainer = document.querySelector('.marker-value-container');
+//     const uvValueCircle = markerContainer.querySelector('.value-circle');
+
+//     // Adjust position of the marker based on the percentage
+//     markerContainer.style.left = `calc(${percentageValue}% - 20px)`;
+//     uvValueCircle.textContent = uvIndex; // Set the UV index value inside the circle
+//     setUVIndexPosition(uvIndex, 11);
+// }
+
+function getPrimaryPollutant(code) {
+    const pollutants = ['PM2.5', 'PM10', 'O3', 'NO2', 'CO', 'SO2'];
+    return pollutants[code] || 'Unknown';
+}
+
+function updateCityName(cityName) {
+    const citySpan = document.getElementById('city_name');
+    citySpan.textContent = `for ${cityName}`;
+}
+
+
+
+// Call loadWeatherData on page load
+document.addEventListener('DOMContentLoaded', loadWeatherData);
+
+        </script> 
    </body>
 </html>
