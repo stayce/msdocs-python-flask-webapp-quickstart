@@ -43,13 +43,16 @@ def get_username(user_id):
         return user_info['user']['name']
     else:
         return user_id  # Return user ID if unable to fetch username
-
+    
 @app.route('/slack/events', methods=['POST'])
 def slack_events():
     data = request.json
     if data.get('type') == 'event_callback' and data['event'].get('type') == 'message':
-        # Extract necessary information
-        message = data['event'].get('text')
+        # Ignore messages without text or with subtypes indicating automated messages
+        if 'subtype' in data['event'] or not data['event'].get('text'):
+            return 'OK', 200
+
+        message = data['event']['text']  # 'text' is ensured to exist and be non-None here
         user_id = data['event'].get('user')
         username = get_username(user_id)
         timestamp = data['event'].get('ts')
