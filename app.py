@@ -29,7 +29,11 @@ def post_to_airtable(table_name, data):
     AIRTABLE_PERSONAL_ACCESS_TOKEN = os.getenv('AIRTABLE_PERSONAL_ACCESS_TOKEN')
     endpoint = f'https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{table_name}'
     response = requests.post(endpoint, json=data, headers=airtable_headers(AIRTABLE_PERSONAL_ACCESS_TOKEN))
-    print(response.json())
+    if response.status_code != 200:
+        print(f"Error posting to Airtable: {response.status_code}, {response.text}")
+    else:
+        print("Successfully posted to Airtable:", response.json())
+
 
 def get_username(user_id):
     """Retrieve username from user ID using Slack API"""
@@ -55,6 +59,7 @@ def slack_events():
         # Retrieve channel information using Slack API
         response = requests.get(f'https://slack.com/api/conversations.info?channel={channel_id}', headers=slack_headers)
         channel_info = response.json()
+        print(f'Channel info: {channel_info}')
         if response.status_code == 200 and channel_info.get('ok'):
             channel_name = channel_info['channel']['name']
             # Extract information, adjust regex to account for angle brackets
@@ -73,10 +78,12 @@ def slack_events():
                     "Channel": channel_name
                 }
             }
+            print(f'Extracted data: {data_to_post}')
             
             # Check if the channel is one of the specified ones before posting
             if channel_name.lower() in ['projects', 'research']:  # Add more channel names as needed
                 post_to_airtable(channel_name, data_to_post)
+                print(f'Posted to Airtable: {data_to_post}')
         
         return 'OK', 200
     
