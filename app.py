@@ -81,7 +81,7 @@ def slack_events():
             print(f'Extracted data: {data_to_post}')
             
             # Check if the channel is one of the specified ones before posting
-            if channel_name.lower() in ['projects', 'research']:  # Add more channel names as needed
+            if channel_name.lower() in ['keep', 'research', 'people', 'projects']:  # Add more channel names as needed
                 post_to_airtable(channel_name, data_to_post)
                 print(f'Posted to Airtable: {data_to_post}')
         
